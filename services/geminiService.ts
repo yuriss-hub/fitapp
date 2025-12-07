@@ -1,7 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { WorkoutPlan } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialize with fallback to prevent white screen of death if key is missing
+const apiKey = process.env.API_KEY || "";
+const ai = new GoogleGenAI({ apiKey });
 
 const WORKOUT_SCHEMA = {
   type: Type.OBJECT,
@@ -42,6 +44,10 @@ export const generateWorkoutPlan = async (
   daysPerWeek: number,
   limitations: string
 ): Promise<WorkoutPlan | null> => {
+  if (!apiKey) {
+    console.error("API Key não encontrada. Configure a variável de ambiente API_KEY.");
+    return null;
+  }
   try {
     const prompt = `Crie uma rotina de treino de musculação completa e estruturada.
     Objetivo: ${goal}.
@@ -76,6 +82,9 @@ export const getCoachAdvice = async (
   userMessage: string,
   contextData: string
 ): Promise<string> => {
+  if (!apiKey) {
+    return "Erro de configuração: Chave de API não encontrada. Por favor, configure a API Key no painel da Vercel.";
+  }
   try {
     const systemInstruction = `Você é o TitanCoach, um personal trainer e nutricionista especialista.
     Seu tom é motivador, direto e baseado em ciência.
